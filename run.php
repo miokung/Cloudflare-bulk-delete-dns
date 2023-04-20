@@ -16,8 +16,15 @@ $headers = [
 $response        = request("GET", 'https://api.cloudflare.com/client/v4/zones?name=' . DOMAIN, $headers);
 $zone_identifier = $response['result'][0]['id'];
 print_r("Zones: {$zone_identifier}\n");
+if (!$zone_identifier) {
+    die('Zone not found');
+}
 // get dns from zone identifier
 $response = request("GET", "https://api.cloudflare.com/client/v4/zones/{$zone_identifier}/dns_records", $headers);
+if ($response['success'] === false) {
+    print_r(json_encode($response, JSON_PRETTY_PRINT));
+    die();
+}
 // loop through records and delete it all!!
 foreach ($response['result'] as $record) {
     $identifier = $record['id'];
